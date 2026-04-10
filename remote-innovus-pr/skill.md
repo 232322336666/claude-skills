@@ -32,6 +32,14 @@ Run Cadence Innovus P&R flow on a remote Linux server via SSH/SCP. The server ha
 
 The example template has all library paths, MMMC config, and layer maps pre-configured. **Never write scripts from scratch.** Copy the template, then modify only the design-specific parts.
 
+**WARNING: Innovus TCL scripts are extremely sensitive to missing options.** Even a single omitted flag can cause the flow to silently produce wrong results or crash hours later. The example template has been verified through real tapeout runs — it contains hundreds of carefully tuned options for `setNanoRouteMode`, `setSrouteMode`, `set_ccopt_property`, `setExtractRCMode`, etc. that this skill only summarizes at a high level.
+
+**Therefore:**
+1. Always `cp -r` the example template as the starting point
+2. Only modify the design-specific lines listed in the "What to Modify" table below
+3. Do NOT rewrite scripts from scratch based on this skill alone — use it as a guide for WHAT to change, not as a complete reference for HOW each command works
+4. If unsure about a command's options, read the original template file first and preserve its options
+
 ```bash
 # Copy template
 ssh zhengnafu2@mee1.ee.cityu.edu.hk \
