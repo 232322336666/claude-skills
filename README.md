@@ -1,13 +1,8 @@
 # vibe_circuit_deisgn.skill
 
-**[English](#english)** | **[中文](#-1)**
-
-A collection of Claude Code skills for IC design automation — VCS simulation, DC synthesis, Innovus P&R, Formality verification, and team-based EDA workflows on remote Linux servers.
+**[:us: English](#english)** | **[:cn: 中文](#中文)**
 
 ---
-
-<details open>
-<summary><strong>English</strong></summary>
 
 <a id="english"></a>
 
@@ -134,18 +129,14 @@ This ensures consistency and avoids syntax errors in tool configuration files.
 
 MIT
 
-<br>
-
-**[Switch to 中文](#-1)**
-
-</details>
-
 ---
 
-<details>
-<summary><strong>中文</strong></summary>
+**[Back to Top](#vibe_circuit_deisgnskill)** | **[Switch to 中文](#中文)**
 
-<a id="中文-1"></a>
+---
+---
+
+<a id="中文"></a>
 
 ## EDA 核心技能
 
@@ -283,8 +274,6 @@ EDA 流程在每个阶段完成后自动写入记忆检查点：
 
 MIT
 
-<br>
+---
 
-**[Switch to English](#english)**
-
-</details>
+**[Back to Top](#vibe_circuit_deisgnskill)** | **[Switch to English](#english)**
