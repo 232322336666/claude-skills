@@ -25,13 +25,13 @@ Run formal equivalence verification (FEV) using Synopsys Formality on a remote L
 
 ## CRITICAL: Always Copy from Example Template
 
-**The example template at `/home/research/zhengnafu2/agent_digits/example/fm/` is a verified, working reference. Always copy from it to avoid syntax errors (especially `set_top` format).**
+**The example template at `~/agent_digits/example/fm/` is a verified, working reference. Always copy from it to avoid syntax errors (especially `set_top` format).**
 
 ### Step 1: Copy template structure
 
 ```bash
 # On remote server — copy entire fm directory structure
-ssh user@server "cd /project && cp -r /home/research/zhengnafu2/agent_digits/example/fm/ ./fm_new && cd fm_new && rm -rf rpt/* log/* fss/* FM_INFO* formality_svf/* formality*.log fm_shell_command.log"
+ssh user@server "cd /project && cp -r ~/agent_digits/example/fm/ ./fm_new && cd fm_new && rm -rf rpt/* log/* fss/* FM_INFO* formality_svf/* formality*.log fm_shell_command.log"
 ```
 
 ### Step 2: Modify only 1 thing in `.synopsys_fm.setup`
@@ -80,7 +80,7 @@ set verification_failing_point_limit 0
 set hdlin_dwroot /opt/synopsys/syn/V-2023.12
 
 #**************************************** Library setup ***************************************************
-set search_path [list "/home/research/yeke22/STDCELL/tcbn65lp_220a/A100001_20180209/TSMCHOME/digital/Front_End/timing_power_noise/CCS/tcbn65lp_200a/"  \
+set search_path [list "$TSMC_HOME/digital/Front_End/timing_power_noise/CCS/tcbn65lp_200a/"  \
 		]
 
 set lib_files [list 	tcbn65lptc_ccs.db 		\

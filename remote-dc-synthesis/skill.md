@@ -29,13 +29,13 @@ Run RTL synthesis using Synopsys Design Compiler on a remote Linux server with T
 
 ## CRITICAL: Always Copy from Example Template
 
-**The example template at `/home/research/zhengnafu2/agent_digits/example/dc/` is a verified, working reference. Always copy from it to avoid syntax errors and configuration mismatches.**
+**The example template at `~/agent_digits/example/dc/` is a verified, working reference. Always copy from it to avoid syntax errors and configuration mismatches.**
 
 ### Step 1: Copy template structure
 
 ```bash
 # On remote server — copy entire dc directory structure
-ssh user@server "cd /project && cp -r /home/research/zhengnafu2/agent_digits/example/dc/ ./dc_new && cd dc_new && rm -rf gate/* rpt/* sdc/* sdf/* svf/* check/* log/* ddc/* work/* alib-* *.log default.svf command.log"
+ssh user@server "cd /project && cp -r ~/agent_digits/example/dc/ ./dc_new && cd dc_new && rm -rf gate/* rpt/* sdc/* sdf/* svf/* check/* log/* ddc/* work/* alib-* *.log default.svf command.log"
 ```
 
 ### Step 2: Upload your RTL files
@@ -96,8 +96,8 @@ remove_design -all
 set_host_options -max_cores 16
 
 #**************************************** Library Setup ***************************************************
-set search_path [list "/home/research/yeke22/STDCELL/tcbn65lp_220a/A100001_20180209/TSMCHOME/digital/Front_End/timing_power_noise/CCS/tcbn65lp_200a/"  \
-		"/home/research/zhengnafu2/digital/study/dc/rtl/twovth_ctrl.v"  \
+set search_path [list "$TSMC_HOME/digital/Front_End/timing_power_noise/CCS/tcbn65lp_200a/"  \
+		"/home/research/$USER/digital/study/dc/rtl/twovth_ctrl.v"  \
     ]
 
 # Define worst case library

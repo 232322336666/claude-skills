@@ -18,10 +18,10 @@ Run Cadence Innovus P&R flow on a remote Linux server via SSH/SCP. The server ha
 ## Prerequisites
 
 ### Remote (Linux server)
-- Server: `mee1.ee.cityu.edu.hk`, User: `zhengnafu2`
+- Server: `$SERVER`, User: `$USER`
 - Innovus: `/opt/cadence/installs/INNOVUS211/bin/innovus` (**NOT** INNOVUSEXPORT21)
-- TSMC 65nm libraries at `/home/research/yeke22/STDCELL/tcbn65lp_220a/`
-- Example template at `/home/research/zhengnafu2/agent_digits/example/innovus_flow/`
+- TSMC 65nm libraries at `$STDCELL_PATH/`
+- Example template at `~/agent_digits/example/innovus_flow/`
 - DC outputs must exist: `../dc/gate/{top}_netlist.v`, `../dc/sdc/{top}.sdc`
 
 ### Local (Windows/macOS)
@@ -42,13 +42,13 @@ The example template has all library paths, MMMC config, and layer maps pre-conf
 
 ```bash
 # Copy template
-ssh zhengnafu2@mee1.ee.cityu.edu.hk \
-  "cp -r /home/research/zhengnafu2/agent_digits/example/innovus_flow/ \
-   /home/research/zhengnafu2/agent_digits/{project}/innovus/"
+ssh $USER@$SERVER \
+  "cp -r ~/agent_digits/example/innovus_flow/ \
+   ~/agent_digits/{project}/innovus/"
 
 # Clean generated files from example run
-ssh zhengnafu2@mee1.ee.cityu.edu.hk \
-  "cd /home/research/zhengnafu2/agent_digits/{project}/innovus/ && \
+ssh $USER@$SERVER \
+  "cd ~/agent_digits/{project}/innovus/ && \
    rm -rf save/* output/* rpt/* extLogDir cdBfile *.rpt *.rpt.old logFile power.rpt \
    rc_model.bin mp_data* HRAM_TOP timingReports .WeightWriting* .timing_file* *.swp .cadence/ \
    innovus.cmd* innovus.log* innovus.logv* innovus_run.log model.asrt*"
@@ -101,11 +101,11 @@ ssh zhengnafu2@mee1.ee.cityu.edu.hk \
 # Copy template (see CRITICAL section above)
 
 # Copy DC outputs to pre/ directory
-ssh zhengnafu2@mee1.ee.cityu.edu.hk \
-  "cd /home/research/zhengnafu2/agent_digits/{project}/innovus/pre && \
+ssh $USER@$SERVER \
+  "cd ~/agent_digits/{project}/innovus/pre && \
    rm -f *.v *.sdc *.io && \
-   cp /home/research/zhengnafu2/agent_digits/{project}/dc/gate/{top}_netlist.v ./ && \
-   cp /home/research/zhengnafu2/agent_digits/{project}/dc/sdc/{top}.sdc ./"
+   cp ~/agent_digits/{project}/dc/gate/{top}_netlist.v ./ && \
+   cp ~/agent_digits/{project}/dc/sdc/{top}.sdc ./"
 ```
 
 ### Step 2: Modify scripts
@@ -244,7 +244,7 @@ setStreamOutMode -SEvianames false -specifyViaName default \
 streamOut ./output/${init_top_cell}.gds -dieAreaAsBoundary \
   -libName DesignLib -mapFile ./lib/innovus_gds_out.map \
   -mode ALL -stripes 1 -units 1000 -merge {\
-  /home/research/yeke22/STDCELL/tcbn65lp_220a/A100001_20180209/TSMCHOME/digital/Back_End/gds/tcbn65lp_200a/tcbn65lp.gds}
+  $TSMC_HOME/digital/Back_End/gds/tcbn65lp_200a/tcbn65lp.gds}
 
 saveDesign ./save/signoff.enc
 ```
@@ -254,8 +254,8 @@ saveDesign ./save/signoff.enc
 ```bash
 # IMPORTANT: Use full path to INNOVUS211, not the INNOVUSEXPORT21 that `which` resolves to
 # IMPORTANT: Use -nowin flag for non-GUI mode
-ssh zhengnafu2@mee1.ee.cityu.edu.hk \
-  "cd /home/research/zhengnafu2/agent_digits/{project}/innovus && \
+ssh $USER@$SERVER \
+  "cd ~/agent_digits/{project}/innovus && \
    nohup /opt/cadence/installs/INNOVUS211/bin/innovus -nowin \
    -files scripts/all.tcl > innovus_run.log 2>&1 &"
 ```
@@ -266,16 +266,16 @@ Typical runtime: 15-20 minutes for a small design (~2000 gates).
 
 ```bash
 # Check log line count (grows as flow progresses)
-ssh zhengnafu2@mee1.ee.cityu.edu.hk \
-  "wc -l /home/research/zhengnafu2/agent_digits/{project}/innovus/innovus.log"
+ssh $USER@$SERVER \
+  "wc -l ~/agent_digits/{project}/innovus/innovus.log"
 
 # Check latest activity
-ssh zhengnafu2@mee1.ee.cityu.edu.hk \
-  "tail -30 /home/research/zhengnafu2/agent_digits/{project}/innovus/innovus.log"
+ssh $USER@$SERVER \
+  "tail -30 ~/agent_digits/{project}/innovus/innovus.log"
 
 # Check if still running
-ssh zhengnafu2@mee1.ee.cityu.edu.hk \
-  "ps aux | grep 'zhengnafu2.*innovus' | grep -v grep | wc -l"
+ssh $USER@$SERVER \
+  "ps aux | grep '$USER.*innovus' | grep -v grep | wc -l"
 ```
 
 Log milestones by line count (approximate):
@@ -289,25 +289,25 @@ Log milestones by line count (approximate):
 
 ```bash
 # Check errors
-ssh zhengnafu2@mee1.ee.cityu.edu.hk \
+ssh $USER@$SERVER \
   "grep 'ERROR' innovus.log | grep -v 'Error Limit'"
 
 # Check DRC
-ssh zhengnafu2@mee1.ee.cityu.edu.hk \
+ssh $USER@$SERVER \
   "cat rpt/signOff.drc.rpt"
 
 # Check connectivity
-ssh zhengnafu2@mee1.ee.cityu.edu.hk \
+ssh $USER@$SERVER \
   "tail -10 rpt/signOff.conn.rpt"
 
 # Check timing
-ssh zhengnafu2@mee1.ee.cityu.edu.hk \
+ssh $USER@$SERVER \
   "zcat rpt/signOffTimingReports/{top}_postRoute.summary.gz | tail -20"
-ssh zhengnafu2@mee1.ee.cityu.edu.hk \
+ssh $USER@$SERVER \
   "zcat rpt/signOffTimingReports/{top}_postRoute_hold.summary.gz | tail -20"
 
 # Check gate count
-ssh zhengnafu2@mee1.ee.cityu.edu.hk \
+ssh $USER@$SERVER \
   "cat rpt/signOff.gatecount.rpt"
 ```
 
@@ -315,20 +315,20 @@ ssh zhengnafu2@mee1.ee.cityu.edu.hk \
 
 ```bash
 mkdir -p {local_project}/innovus_output
-scp zhengnafu2@mee1.ee.cityu.edu.hk:\
-  /home/research/zhengnafu2/agent_digits/{project}/innovus/output/{top}.gds \
+scp $USER@$SERVER:\
+  ~/agent_digits/{project}/innovus/output/{top}.gds \
   {local_project}/innovus_output/
-scp zhengnafu2@mee1.ee.cityu.edu.hk:\
-  /home/research/zhengnafu2/agent_digits/{project}/innovus/output/{top}.sdf \
+scp $USER@$SERVER:\
+  ~/agent_digits/{project}/innovus/output/{top}.sdf \
   {local_project}/innovus_output/
-scp zhengnafu2@mee1.ee.cityu.edu.hk:\
-  /home/research/zhengnafu2/agent_digits/{project}/innovus/output/EDI_to_VCS_{top}.v \
+scp $USER@$SERVER:\
+  ~/agent_digits/{project}/innovus/output/EDI_to_VCS_{top}.v \
   {local_project}/innovus_output/
-scp zhengnafu2@mee1.ee.cityu.edu.hk:\
-  /home/research/zhengnafu2/agent_digits/{project}/innovus/output/{top}_WC.spef \
+scp $USER@$SERVER:\
+  ~/agent_digits/{project}/innovus/output/{top}_WC.spef \
   {local_project}/innovus_output/
-scp zhengnafu2@mee1.ee.cityu.edu.hk:\
-  /home/research/zhengnafu2/agent_digits/{project}/innovus/output/{top}_BC.spef \
+scp $USER@$SERVER:\
+  ~/agent_digits/{project}/innovus/output/{top}_BC.spef \
   {local_project}/innovus_output/
 ```
 
@@ -420,7 +420,7 @@ saveDesign ./save/place_modified.enc
 
 ## Advanced: Analog Module + IO Pad Integration
 
-The example template (`/home/research/zhengnafu2/agent_digits/example/innovus_flow/`) was originally designed for a mixed-signal design with analog macros and IO pads. The pure-digital flow above stripped those parts out. If your design includes analog modules or needs IO pads, add back the following configurations.
+The example template (`~/agent_digits/example/innovus_flow/`) was originally designed for a mixed-signal design with analog macros and IO pads. The pure-digital flow above stripped those parts out. If your design includes analog modules or needs IO pads, add back the following configurations.
 
 **IMPORTANT: Always start from the example template and KEEP the analog/IO sections, only modifying design-specific names and positions. Do not try to add these from memory — the template's exact options for `setSrouteMode`, `addIoFiller`, `sroute` for analog/IO are tuned and verified.**
 

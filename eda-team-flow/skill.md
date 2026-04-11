@@ -36,7 +36,7 @@ Each checkpoint is written to the project memory system. On crash/restart, read 
 
 ### How It Works
 
-1. At each stage completion, write a memory file to `C:\Users\zhengnafu2\.claude\projects\D--claudecode-digits\memory\`
+1. At each stage completion, write a memory file to `C:\Users\$USER\.claude\projects\D--claudecode-digits\memory\`
 2. File named `eda-progress-{project}.md` with type `project`
 3. Contains: stage completed, results, remote paths, next action, any issues
 4. On crash restart: read MEMORY.md → find progress file → resume from last completed stage
@@ -53,14 +53,14 @@ type: project
 # EDA Flow Progress: {project}
 
 **Last Updated:** 2026-04-09 15:30
-**Project Dir:** /home/research/zhengnafu2/agent_digits/{project}/
+**Project Dir:** ~/agent_digits/{project}/
 **Top Module:** {top_module_name}
 **Local RTL:** D:\claudecode\digits\{project}\
 
 ## Current Stage: VCS_DONE / DC_DONE / FM_DONE / ALL_COMPLETE
 
 ## Stage 1: VCS Simulation — [PENDING / DONE / FAILED]
-- Remote: /home/research/zhengnafu2/agent_digits/{project}/vcs/
+- Remote: ~/agent_digits/{project}/vcs/
 - Status: PASS/FAIL
 - Tests: X/Y passed
 - RTL fixes applied: (describe any changes, or "none")
@@ -68,7 +68,7 @@ type: project
 - Key log: (paste critical output)
 
 ## Stage 2: DC Synthesis — [PENDING / DONE / FAILED]
-- Remote: /home/research/zhengnafu2/agent_digits/{project}/dc/
+- Remote: ~/agent_digits/{project}/dc/
 - Status: PASS/FAIL
 - Clock: X MHz (period X ns)
 - Setup slack: X.XX ns (MET/VIOLATED)
@@ -80,7 +80,7 @@ type: project
 - Key log: (paste critical output)
 
 ## Stage 3: FM Formal Verification — [PENDING / DONE / FAILED]
-- Remote: /home/research/zhengnafu2/agent_digits/{project}/fm/
+- Remote: ~/agent_digits/{project}/fm/
 - Status: PASS/FAIL
 - Compare points matched: XXX
 - Compare points unmatched: XXX
@@ -211,9 +211,9 @@ You are the VCS simulation agent on team "eda-flow".
 
 Your task: Run VCS simulation for {project_name} on remote server.
 
-Remote: zhengnafu2@mee1.ee.cityu.edu.hk
-Remote path: /home/research/zhengnafu2/agent_digits/{project}/vcs/
-Example template: /home/research/zhengnafu2/agent_digits/example/vcs/
+Remote: $USER@$SERVER
+Remote path: ~/agent_digits/{project}/vcs/
+Example template: ~/agent_digits/example/vcs/
 Local RTL: D:\claudecode\digits\{project}\
 
 Steps (follow remote-vcs-waveform-viewing skill):
@@ -239,9 +239,9 @@ You are the DC synthesis agent on team "eda-flow".
 
 Your task: Run DC synthesis for {project_name} on remote server.
 
-Remote: zhengnafu2@mee1.ee.cityu.edu.hk
-Remote path: /home/research/zhengnafu2/agent_digits/{project}/dc/
-Example template: /home/research/zhengnafu2/agent_digits/example/dc/
+Remote: $USER@$SERVER
+Remote path: ~/agent_digits/{project}/dc/
+Example template: ~/agent_digits/example/dc/
 Top module: {top_module_name}
 Local RTL: D:\claudecode\digits\{project}\
 
@@ -282,9 +282,9 @@ You are the FM formal verification agent on team "eda-flow".
 
 Your task: Run Formality verification for {project_name} on remote server.
 
-Remote: zhengnafu2@mee1.ee.cityu.edu.hk
-Remote path: /home/research/zhengnafu2/agent_digits/{project}/fm/
-Example template: /home/research/zhengnafu2/agent_digits/example/fm/
+Remote: $USER@$SERVER
+Remote path: ~/agent_digits/{project}/fm/
+Example template: ~/agent_digits/example/fm/
 Top module: {top_module_name}
 
 PREREQUISITE: DC synthesis completed successfully.
@@ -309,16 +309,16 @@ When done, mark your task as completed and notify the team lead with:
 
 | Item | Value |
 |------|-------|
-| Server | `mee1.ee.cityu.edu.hk` |
-| User | `zhengnafu2` |
-| Project base | `/home/research/zhengnafu2/agent_digits/{project}/` |
-| Example templates | `/home/research/zhengnafu2/agent_digits/example/` |
+| Server | `$SERVER` |
+| User | `$USER` |
+| Project base | `~/agent_digits/{project}/` |
+| Example templates | `~/agent_digits/example/` |
 | Library | TSMC 65nm `tcbn65lp` |
 
 ## Project Directory Layout on Remote Server
 
 ```
-/home/research/zhengnafu2/agent_digits/{project}/
+~/agent_digits/{project}/
 ├── vcs/          ← VCS workspace
 │   ├── Makefile
 │   ├── filelist.f

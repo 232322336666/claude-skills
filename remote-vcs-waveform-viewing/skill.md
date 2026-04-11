@@ -27,13 +27,13 @@ Run VCS simulations on a remote Linux server and view waveforms locally in VS Co
 
 ## CRITICAL: Always Copy from Example Template
 
-**The example template at `/home/research/zhengnafu2/agent_digits/example/vcs/` is a verified, working reference. Always copy from it to avoid build errors.**
+**The example template at `~/agent_digits/example/vcs/` is a verified, working reference. Always copy from it to avoid build errors.**
 
 ### Step 1: Copy template structure
 
 ```bash
 # On remote server — copy entire vcs directory
-ssh user@server "cd /project && cp -r /home/research/zhengnafu2/agent_digits/example/vcs/ ./vcs_new && cd vcs_new && rm -rf simv* csrc* DVEfiles AN.DB *.fsdb *.log *.vpd *.key *.vdb ucli.key verdi_config_file wave.fsdb wave.vcd"
+ssh user@server "cd /project && cp -r ~/agent_digits/example/vcs/ ./vcs_new && cd vcs_new && rm -rf simv* csrc* DVEfiles AN.DB *.fsdb *.log *.vpd *.key *.vdb ucli.key verdi_config_file wave.fsdb wave.vcd"
 ```
 
 ### Step 2: Upload your design files
@@ -211,8 +211,8 @@ code wave.vcd
 
 ```bash
 # Complete workflow
-scp src/*.v user@mee1.ee.cityu.edu.hk:/home/user/project/vcs/ && \
-ssh user@mee1.ee.cityu.edu.hk "cd /home/user/project/vcs && make clean && make" && \
-scp user@mee1.ee.cityu.edu.hk:/home/user/project/vcs/wave.vcd ./ && \
+scp src/*.v user@$SERVER:/home/user/project/vcs/ && \
+ssh user@$SERVER "cd /home/user/project/vcs && make clean && make" && \
+scp user@$SERVER:/home/user/project/vcs/wave.vcd ./ && \
 code wave.vcd
 ```
