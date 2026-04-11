@@ -417,3 +417,132 @@ saveDesign ./save/place_modified.enc
 5. **The IMPCCOPT-2215 error is harmless** — it appears when clock gating cells are present (DC inserts them automatically when `set_clock_gating_style` is used). The clock tree still works correctly.
 
 6. **MMMC config is pre-configured** — the mmmc.tcl from the example template has WC/TC/BC corners, QRC tech files, SI-aware CDB files all pointing to the right paths. Only the SDC path needs changing.
+
+## Advanced: Analog Module + IO Pad Integration
+
+The example template (`/home/research/zhengnafu2/agent_digits/example/innovus_flow/`) was originally designed for a mixed-signal design with analog macros and IO pads. The pure-digital flow above stripped those parts out. If your design includes analog modules or needs IO pads, add back the following configurations.
+
+**IMPORTANT: Always start from the example template and KEEP the analog/IO sections, only modifying design-specific names and positions. Do not try to add these from memory — the template's exact options for `setSrouteMode`, `addIoFiller`, `sroute` for analog/IO are tuned and verified.**
+
+### What changes at each stage
+
+#### 1-init.tcl — Additional LEF files
+
+```tcl
+set init_lef_file {
+        ./lib/tcbn65lp_9lmT2.lef              # stdcell (always needed)
+        /path/to/analog_macro.lef              # analog macro LEF (ADD)
+        /path/to/tpdn65lpnv2od3_9lm.lef        # IO pad LEF (ADD if using IO pads)
+}
+
+# Multiple power domains
+set init_gnd_net {VSS}
+set init_pwr_net {AVDD DVDD}              # AVDD for analog, DVDD for digital
+```
+
+#### 2-fp.tcl — Major additions
+
+The floorplan becomes significantly more complex. The example template's 2-fp.tcl is the reference — it handles all of the following:
+
+**a) IO pad placement:**
+```tcl
+# Load IO assignment file (defines signal-to-pad mapping and pad order)
+loadIoFile ./pre/${init_top_cell}.io
+
+# Fill gaps between IO pads with filler pads
+addIoFiller -cell PFILLER20 PFILLER10 PFILLER5 PFILLER1 PFILLER05 -prefix IOFILLER
+addIoFiller -cell PFILLER0005 -prefix IOFILLER -fillAnyGap
+```
+
+**b) Analog macro placement:**
+```tcl
+# Fix analog macro at specific coordinates
+placeInstance u_ANALOG_FIXLCS 390 390 -fixed
+
+# Add halo (keep-out zone) around all macros
+addHaloToBlock -allMacro 1 1 1 1
+
+# Block routing over the analog macro
+createRouteBlk -layer all -cover -inst u_ANALOG_FIXLCS
+```
+
+**c) Multiple power domain connections:**
+```tcl
+clearGlobalNets
+globalNetConnect AVDD -type pgpin -pin AVDD -inst *    # analog power
+globalNetConnect DVDD -type pgpin -pin DVDD -inst *    # digital power
+globalNetConnect VSS  -type pgpin -pin VSS  -inst *    # common ground
+globalNetConnect DVDD -type tiehi -inst * -all
+globalNetConnect VSS  -type tielo -inst * -all
+```
+
+**d) Power ring for multiple nets:**
+```tcl
+addRing -nets {DVDD AVDD VSS} -type core_rings ...    # 3 nets instead of 2
+```
+
+**e) Special routing for analog and IO power:**
+```tcl
+# Standard cell power routing
+sroute -connect {corePin floatingStripe} -nets {DVDD VSS} ...
+
+# Analog cell power routing (connect macro pins to ring)
+sroute -connect {blockPin floatingStripe} -nets {DVDD AVDD VSS} \
+  -layerChangeRange {M1(1) AP(10)} -blockPinTarget {nearestTarget} ...
+
+# IO pad power routing
+sroute -nets {AVDD VSS DVDD} -connect {padPin} \
+  -padPinPortConnect {allPort oneGeom} -padPinTarget {nearestTarget} ...
+```
+
+#### 6-signoff.tcl — Multiple GDS merge
+
+```tcl
+streamOut ./output/${init_top_cell}.gds ... -merge {\
+        /path/to/tcbn65lp.gds           # stdcell
+        /path/to/analog_macro.gds        # analog macro GDS (ADD)
+        /path/to/tpdn65lpnv2od3.gds      # IO pad GDS (ADD)
+        /path/to/other_macro.gds         # any additional macros (ADD)
+}
+```
+
+Also exclude IO filler cells in netlist output:
+```tcl
+saveNetlist ./output/Calibre_${init_top_cell}_wo_filler.v \
+  -excludeCellInst {FILL1 FILL16 FILL2 FILL32 FILL4 FILL64 FILL8 \
+                     PFILLER0005 PFILLER05 PFILLER1 PFILLER10 PFILLER20 PFILLER5}
+```
+
+### Typical analog+IO project layout
+
+```
+{project}/innovus/
+├── lib/
+│   ├── tcbn65lp_9lmT2.lef              # stdcell LEF
+│   ├── {analog}_edited.lef             # analog macro LEF (copied from template or provided)
+│   ├── tpdn65lpnv2od3_9lm.lef.edited   # IO pad LEF (copied from template)
+│   ├── innovus_gds_out.map
+│   └── quantus_extract.layermap
+├── pre/
+│   ├── {top}_netlist.v
+│   ├── {top}.sdc
+│   └── {top}.io                        # IO assignment file (pin-to-pad mapping)
+├── scripts/
+│   ├── all.tcl
+│   ├── mmmc.tcl
+│   ├── 1-init.tcl                       # includes analog + IO LEFs
+│   ├── 2-fp.tcl                         # includes IO + analog placement
+│   ├── 3-place.tcl                      # same as digital
+│   ├── 4-cts.tcl                        # same as digital
+│   ├── 5-route.tcl                      # same as digital (routing blockage protects analog)
+│   └── 6-signoff.tcl                    # multi-GDS merge + IO filler exclusion
+```
+
+### IO assignment file (.io)
+
+The `.io` file defines which signal maps to which IO pad and the pad order around the die perimeter. This is design-specific and must be created for each project. The example template has `pre/MIX_TOP.io` as a reference for the format. Key points:
+
+- Pad order is clockwise or counter-clockwise around the die edge
+- Each line: `pad_instance_name pad_cell_type signal_name side offset`
+- Power pads (VDD/VSS) are interleaved with signal pads
+- The number and placement of power pads affects IR drop
